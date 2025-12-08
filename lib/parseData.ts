@@ -1,0 +1,102 @@
+import Papa from 'papaparse';
+import { IndexData, SummaryStats, TimeRange } from './types';
+
+export async function parseIndexData(): Promise<IndexData[]> {
+  const response = await fetch('/index_data.csv');
+  const csvText = await response.text();
+
+  return new Promise((resolve, reject) => {
+    Papa.parse(csvText, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const data: IndexData[] = results.data
+          .map((row: any) => {
+            // Skip rows with empty dates
+            if (!row.Date || !row['India Venture index']) return null;
+
+            // Parse the date (format: DD-MMM-YY)
+            const dateParts = row.Date.split('-');
+            const monthMap: { [key: string]: number } = {
+              'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+              'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+            };
+
+            const day = parseInt(dateParts[0]);
+            const month = monthMap[dateParts[1]];
+            const year = 2000 + parseInt(dateParts[2]);
+            const date = new Date(year, month, day);
+
+            // Remove commas and parse numbers
+            const nifty50 = parseFloat(row['Nifty 50']?.replace(/,/g, '') || '0');
+            const nifty50Rebased = parseFloat(row['Nifty 50 (base to 100)'] || '0');
+            const indiaVentureIndex = parseFloat(row['India Venture index'] || '0');
+
+            return {
+              date,
+              nifty50,
+              nifty50Rebased,
+              indiaVentureIndex,
+            };
+          })
+          .filter((item): item is IndexData => item !== null);
+
+        resolve(data);
+      },
+      error: (error) => {
+        reject(error);
+      },
+    });
+  });
+}
+
+export function filterDataByTimeRange(data: IndexData[], range: TimeRange): IndexData[] {
+  if (range === 'ALL') return data;
+
+  const now = new Date();
+  const cutoffDate = new Date();
+
+  switch (range) {
+    case '1Y':
+      cutoffDate.setFullYear(now.getFullYear() - 1);
+      break;
+    case '3Y':
+      cutoffDate.setFullYear(now.getFullYear() - 3);
+      break;
+    case '5Y':
+      cutoffDate.setFullYear(now.getFullYear() - 5);
+      break;
+  }
+
+  return data.filter(item => item.date >= cutoffDate);
+}
+
+export function calculateSummaryStats(data: IndexData[]): SummaryStats {
+  if (data.length === 0) {
+    return {
+      currentIndexLevel: 0,
+      ytdReturn: 0,
+      currentDate: '',
+    };
+  }
+
+  const latestData = data[data.length - 1];
+  const currentYear = latestData.date.getFullYear();
+
+  // Find the first data point of the current year
+  const ytdStartData = data.find(item => item.date.getFullYear() === currentYear);
+
+  const ytdReturn = ytdStartData
+    ? ((latestData.indiaVentureIndex - ytdStartData.indiaVentureIndex) / ytdStartData.indiaVentureIndex) * 100
+    : 0;
+
+  return {
+    currentIndexLevel: latestData.indiaVentureIndex,
+    ytdReturn,
+    currentDate: latestData.date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }),
+  };
+}
