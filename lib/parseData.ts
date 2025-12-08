@@ -43,7 +43,7 @@ export async function parseIndexData(): Promise<IndexData[]> {
 
         resolve(data);
       },
-      error: (error) => {
+      error: (error: any) => {
         reject(error);
       },
     });
