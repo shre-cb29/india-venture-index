@@ -1,8 +1,8 @@
 import Papa from 'papaparse';
-import { IndexData, SummaryStats, TimeRange } from './types';
+import { IndexData, SummaryStats, TimeRange, CompanyData } from './types';
 
 export async function parseIndexData(): Promise<IndexData[]> {
-  const response = await fetch('/index_data.csv');
+  const response = await fetch('/India Venture Index - Index - v2.csv');
   const csvText = await response.text();
 
   return new Promise((resolve, reject) => {
@@ -13,7 +13,7 @@ export async function parseIndexData(): Promise<IndexData[]> {
         const data: IndexData[] = results.data
           .map((row: any) => {
             // Skip rows with empty dates
-            if (!row.Date || !row['India Venture index']) return null;
+            if (!row.Date || !row['India Venture Index']) return null;
 
             // Parse the date (format: DD-MMM-YY)
             const dateParts = row.Date.split('-');
@@ -29,8 +29,8 @@ export async function parseIndexData(): Promise<IndexData[]> {
 
             // Remove commas and parse numbers
             const nifty50 = parseFloat(row['Nifty 50']?.replace(/,/g, '') || '0');
-            const nifty50Rebased = parseFloat(row['Nifty 50 (base to 100)'] || '0');
-            const indiaVentureIndex = parseFloat(row['India Venture index'] || '0');
+            const nifty50Rebased = parseFloat(row['Nifty (base to 100)'] || '0');
+            const indiaVentureIndex = parseFloat(row['India Venture Index'] || '0');
 
             return {
               date,
@@ -99,4 +99,55 @@ export function calculateSummaryStats(data: IndexData[]): SummaryStats {
       day: 'numeric',
     }),
   };
+}
+
+export async function parseCompanyData(): Promise<CompanyData[]> {
+  const response = await fetch('/india venture index - lifetime returns.csv');
+  const csvText = await response.text();
+
+  return new Promise((resolve, reject) => {
+    Papa.parse(csvText, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const data: CompanyData[] = results.data
+          .map((row: any) => {
+            // Skip rows with empty company names or placeholder entries
+            if (!row.Company || row.Company.trim() === '' || !row['Listing date']) return null;
+
+            // Parse the date (format: DD-MMM-YY)
+            const dateParts = row['Listing date'].split('-');
+            const monthMap: { [key: string]: number } = {
+              'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+              'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+            };
+
+            const day = parseInt(dateParts[0]);
+            const month = monthMap[dateParts[1]];
+            const year = 2000 + parseInt(dateParts[2]);
+            const listingDate = new Date(year, month, day);
+
+            // Remove commas and parse numbers
+            const ipoValuation = parseFloat(row['IPO valuation']?.replace(/,/g, '') || '0');
+            const currentValuation = parseFloat(row['30-Nov-25']?.replace(/,/g, '') || '0');
+
+            return {
+              listingDate,
+              ticker: row.Ticker || '',
+              company: row.Company || '',
+              ipoValuation,
+              currentValuation,
+              allTimeReturn: row['All time return'] || '',
+              listingYear: year,
+            };
+          })
+          .filter((item): item is CompanyData => item !== null);
+
+        resolve(data);
+      },
+      error: (error: any) => {
+        reject(error);
+      },
+    });
+  });
 }

@@ -11,17 +11,17 @@ export default function SummaryCard({ title, value, change, icon }: SummaryCardP
   const isPositive = change !== undefined && change >= 0;
 
   return (
-    <div className="bg-gray-900 rounded-lg p-6 border border-gray-800 hover:border-emerald-600 transition-colors">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wide">{title}</h3>
-        {icon && <div className="text-gray-400">{icon}</div>}
+    <div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200 hover:border-emerald-500 transition-colors shadow-sm">
+      <div className="flex items-center justify-between mb-3 md:mb-4">
+        <h3 className="text-xs md:text-sm font-medium text-gray-600 uppercase tracking-wide">{title}</h3>
+        {icon && <div className="text-gray-500">{icon}</div>}
       </div>
       <div className="flex items-end justify-between">
-        <p className="text-3xl font-bold text-white">{value}</p>
+        <p className="text-2xl md:text-3xl font-bold text-gray-900">{value}</p>
         {change !== undefined && (
-          <div className={`flex items-center space-x-1 ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
-            {isPositive ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
-            <span className="text-sm font-semibold">{Math.abs(change).toFixed(2)}%</span>
+          <div className={`flex items-center space-x-1 ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
+            {isPositive ? <TrendingUp className="h-4 w-4 md:h-5 md:w-5" /> : <TrendingDown className="h-4 w-4 md:h-5 md:w-5" />}
+            <span className="text-xs md:text-sm font-semibold">{Math.abs(change).toFixed(2)}%</span>
           </div>
         )}
       </div>

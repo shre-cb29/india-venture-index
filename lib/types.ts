@@ -11,4 +11,14 @@ export interface SummaryStats {
   currentDate: string;
 }
 
+export interface CompanyData {
+  listingDate: Date;
+  ticker: string;
+  company: string;
+  ipoValuation: number;
+  currentValuation: number;
+  allTimeReturn: string;
+  listingYear: number;
+}
+
 export type TimeRange = '1Y' | '3Y' | '5Y' | 'ALL';

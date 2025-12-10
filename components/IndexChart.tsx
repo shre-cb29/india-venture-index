@@ -15,40 +15,41 @@ export default function IndexChart({ data }: IndexChartProps) {
   }));
 
   return (
-    <div className="w-full h-[500px] bg-gray-900 rounded-lg p-6 border border-gray-800">
-      <h2 className="text-2xl font-bold text-white mb-6">Index Performance Comparison</h2>
+    <div className="w-full h-[400px] md:h-[600px] lg:h-[700px] bg-white rounded-lg p-4 md:p-6 border border-gray-200 shadow-sm">
+      <h2 className="text-lg md:text-xl font-semibold text-gray-700 mb-4 md:mb-6">India Venture Index vs Nifty 50</h2>
       <ResponsiveContainer width="100%" height="90%">
-        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+        <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
           <XAxis
             dataKey="date"
-            stroke="#9CA3AF"
-            tick={{ fill: '#9CA3AF' }}
-            tickLine={{ stroke: '#9CA3AF' }}
+            stroke="#6B7280"
+            tick={{ fill: '#6B7280', fontSize: 12 }}
+            tickLine={{ stroke: '#6B7280' }}
           />
           <YAxis
-            stroke="#9CA3AF"
-            tick={{ fill: '#9CA3AF' }}
-            tickLine={{ stroke: '#9CA3AF' }}
-            label={{ value: 'Index Value (Base = 100)', angle: -90, position: 'insideLeft', fill: '#9CA3AF' }}
+            stroke="#6B7280"
+            tick={{ fill: '#6B7280', fontSize: 12 }}
+            tickLine={{ stroke: '#6B7280' }}
+            label={{ value: 'Index Value (Base = 100)', angle: -90, position: 'insideLeft', fill: '#6B7280', fontSize: 14 }}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#1F2937',
-              border: '1px solid #374151',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E5E7EB',
               borderRadius: '8px',
-              color: '#F3F4F6',
+              color: '#111827',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
             }}
-            labelStyle={{ color: '#F3F4F6' }}
+            labelStyle={{ color: '#111827', fontWeight: 600 }}
           />
           <Legend
-            wrapperStyle={{ color: '#F3F4F6' }}
+            wrapperStyle={{ color: '#374151' }}
             iconType="line"
           />
           <Line
             type="monotone"
             dataKey="India Venture Index"
-            stroke="#10B981"
+            stroke="#059669"
             strokeWidth={3}
             dot={false}
             activeDot={{ r: 6 }}
@@ -56,7 +57,7 @@ export default function IndexChart({ data }: IndexChartProps) {
           <Line
             type="monotone"
             dataKey="Nifty 50"
-            stroke="#3B82F6"
+            stroke="#2563EB"
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 6 }}
