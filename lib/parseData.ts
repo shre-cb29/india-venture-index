@@ -102,7 +102,7 @@ export function calculateSummaryStats(data: IndexData[]): SummaryStats {
 }
 
 export async function parseCompanyData(): Promise<CompanyData[]> {
-  const response = await fetch('/india venture index - lifetime returns.csv');
+  const response = await fetch('/India Venture Index - Lifetime returns.csv');
   const csvText = await response.text();
 
   return new Promise((resolve, reject) => {
