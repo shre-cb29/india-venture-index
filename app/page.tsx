@@ -1,24 +1,34 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Activity, TrendingUp, Calendar } from 'lucide-react';
-import IndexChart from '@/components/IndexChart';
+import { Activity, TrendingUp, Building2 } from 'lucide-react';
+import VentureIndexChart from '@/components/VentureIndexChart';
+import ComparisonChart from '@/components/ComparisonChart';
+import ReturnsTable from '@/components/ReturnsTable';
 import SummaryCard from '@/components/SummaryCard';
 import { IndexData, TimeRange } from '@/lib/types';
-import { parseIndexData, filterDataByTimeRange, calculateSummaryStats } from '@/lib/parseData';
+import { parseIndexData, filterDataByTimeRange, calculateSummaryStats, calculateReturns, calculateTotalMarketCap } from '@/lib/parseData';
 
 export default function Home() {
   const [allData, setAllData] = useState<IndexData[]>([]);
-  const [filteredData, setFilteredData] = useState<IndexData[]>([]);
-  const [timeRange, setTimeRange] = useState<TimeRange>('ALL');
+  const [filteredDataVenture, setFilteredDataVenture] = useState<IndexData[]>([]);
+  const [filteredDataComparison, setFilteredDataComparison] = useState<IndexData[]>([]);
+  const [timeRangeVenture, setTimeRangeVenture] = useState<TimeRange>('ALL');
+  const [timeRangeComparison, setTimeRangeComparison] = useState<TimeRange>('ALL');
   const [loading, setLoading] = useState(true);
+  const [totalMarketCap, setTotalMarketCap] = useState<number>(0);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const data = await parseIndexData();
+        const [data, marketCap] = await Promise.all([
+          parseIndexData(),
+          calculateTotalMarketCap(),
+        ]);
         setAllData(data);
-        setFilteredData(data);
+        setFilteredDataVenture(data);
+        setFilteredDataComparison(data);
+        setTotalMarketCap(marketCap);
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -30,14 +40,41 @@ export default function Home() {
 
   useEffect(() => {
     if (allData.length > 0) {
-      const filtered = filterDataByTimeRange(allData, timeRange);
-      setFilteredData(filtered);
+      const filteredVenture = filterDataByTimeRange(allData, timeRangeVenture);
+      setFilteredDataVenture(filteredVenture);
     }
-  }, [timeRange, allData]);
+  }, [timeRangeVenture, allData]);
+
+  useEffect(() => {
+    if (allData.length > 0) {
+      const filteredComparison = filterDataByTimeRange(allData, timeRangeComparison);
+      setFilteredDataComparison(filteredComparison);
+    }
+  }, [timeRangeComparison, allData]);
 
   const stats = calculateSummaryStats(allData);
 
   const timeRangeButtons: TimeRange[] = ['1Y', '3Y', '5Y', 'ALL'];
+
+  // Calculate returns for all time ranges
+  const returnsData = timeRangeButtons.map((range) => {
+    const returns = calculateReturns(allData, range);
+    return {
+      timeRange: range,
+      indiaVentureReturn: returns.indiaVentureReturn,
+      nifty50Return: returns.nifty50Return,
+    };
+  });
+
+  // Format market cap for display
+  const formatMarketCap = (value: number) => {
+    if (value >= 100000) {
+      return `₹${(value / 100000).toFixed(2)}L Cr`;
+    } else if (value >= 1000) {
+      return `₹${(value / 1000).toFixed(2)}K Cr`;
+    }
+    return `₹${value.toFixed(2)} Cr`;
+  };
 
   if (loading) {
     return (
@@ -50,63 +87,101 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-        <div className="mb-6 md:mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">India Venture Index Dashboard</h1>
-          <p className="text-gray-600">
-            Track the performance of India&apos;s VC-backed startup ecosystem vs. Nifty 50
+        {/* Header */}
+        <div className="mb-8 md:mb-12">
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-3">
+            India Venture Index
+          </h1>
+          <p className="text-lg text-gray-600">
+            Track the returns of India&apos;s venture-backed startups that are now public companies.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
-          <SummaryCard
-            title="Current Index Level"
-            value={stats.currentIndexLevel.toFixed(2)}
-            icon={<Activity className="h-5 w-5" />}
-          />
-          <SummaryCard
-            title="Year-to-Date Return"
-            value={`${stats.ytdReturn >= 0 ? '+' : ''}${stats.ytdReturn.toFixed(2)}%`}
-            change={stats.ytdReturn}
-            icon={<TrendingUp className="h-5 w-5" />}
-          />
-          <SummaryCard
-            title="Last Updated"
-            value={stats.currentDate}
-            icon={<Calendar className="h-5 w-5" />}
-          />
-        </div>
+        {/* Section 1: India Venture Index */}
+        <div className="mb-10 md:mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6">
+            <SummaryCard
+              title="Index Level"
+              value={stats.currentIndexLevel.toFixed(2)}
+              icon={<Activity className="h-5 w-5" />}
+            />
+            <SummaryCard
+              title="Total Market Cap"
+              value={formatMarketCap(totalMarketCap)}
+              icon={<Building2 className="h-5 w-5" />}
+            />
+            <SummaryCard
+              title="YTD Return"
+              value={`${stats.ytdReturn >= 0 ? '+' : ''}${stats.ytdReturn.toFixed(2)}%`}
+              change={stats.ytdReturn}
+              icon={<TrendingUp className="h-5 w-5" />}
+            />
+          </div>
 
-        <div className="mb-4 md:mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-900">Performance</h2>
-          <div className="flex space-x-2">
-            {timeRangeButtons.map((range) => (
-              <button
-                key={range}
-                onClick={() => setTimeRange(range)}
-                className={`px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  timeRange === range
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                }`}
-              >
-                {range}
-              </button>
-            ))}
+          <div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200 shadow-sm">
+            <div className="mb-4 md:mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <h3 className="text-lg md:text-xl font-serif font-semibold text-gray-900">India Venture Index</h3>
+              <div className="flex space-x-2">
+                {timeRangeButtons.map((range) => (
+                  <button
+                    key={range}
+                    onClick={() => setTimeRangeVenture(range)}
+                    className={`px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      timeRangeVenture === range
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                    }`}
+                  >
+                    {range}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <VentureIndexChart data={filteredDataVenture} />
           </div>
         </div>
 
-        <IndexChart data={filteredData} />
+        {/* Section 2: Performance Comparison */}
+        <div className="mb-10 md:mb-12">
+          <h2 className="text-2xl md:text-3xl font-serif font-semibold text-gray-900 mb-6">
+            Performance Comparison
+          </h2>
 
-        <div className="mt-6 md:mt-8 bg-white rounded-lg p-4 md:p-6 border border-gray-200 shadow-sm">
-          <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-3 md:mb-4">About the Index</h3>
-          <p className="text-gray-700 leading-relaxed mb-4 text-sm md:text-base">
-            The India Venture Index (IND-V) tracks the performance of approximately 30 VC-backed Indian
-            &quot;New Economy&quot; companies listed on NSE/BSE. The index is rebased to 100 as of January 1, 2021,
-            providing a clear benchmark to compare against traditional market indices like Nifty 50.
-          </p>
-          <p className="text-gray-600 text-xs md:text-sm">
-            Base Date: January 1, 2021 | Base Value: 100.00 | Weighting: Total Market Capitalization
-          </p>
+          <div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200 shadow-sm mb-6">
+            <div className="mb-4 md:mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <h3 className="text-lg md:text-xl font-serif font-semibold text-gray-900">
+                India Venture v/s Nifty 50
+              </h3>
+              <div className="flex space-x-2">
+                {timeRangeButtons.map((range) => (
+                  <button
+                    key={range}
+                    onClick={() => setTimeRangeComparison(range)}
+                    className={`px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      timeRangeComparison === range
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                    }`}
+                  >
+                    {range}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <ComparisonChart data={filteredDataComparison} />
+          </div>
+
+          <div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200 shadow-sm">
+            <h3 className="text-lg md:text-xl font-serif font-semibold text-gray-900 mb-4">
+              Returns Comparison
+            </h3>
+            <ReturnsTable returns={returnsData} />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 mb-6 text-sm text-gray-500">
+          <p>Data as of {stats.currentDate}</p>
         </div>
       </div>
     </div>

@@ -65,11 +65,16 @@ export default function CompaniesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-6 md:mb-8 text-gray-900">Companies</h1>
+        <div className="mb-8 md:mb-12">
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-3">Companies</h1>
+          <p className="text-lg text-gray-600">
+            List of companies included in the index with their IPO valuation and current market capitalization.
+          </p>
+        </div>
 
         {years.map((year) => (
           <div key={year} className="mb-8 md:mb-12">
-            <h2 className="text-xl md:text-2xl font-semibold mb-4 text-emerald-600">
+            <h2 className="text-xl md:text-2xl font-serif font-semibold mb-4 text-emerald-600">
               {year}
             </h2>
             <div className="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">

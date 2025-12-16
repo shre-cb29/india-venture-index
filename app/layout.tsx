@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
+import { Roboto, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 
@@ -7,6 +7,12 @@ const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
   subsets: ["latin"],
   variable: "--font-roboto",
+});
+
+const playfair = Playfair_Display({
+  weight: ['400', '500', '600', '700'],
+  subsets: ["latin"],
+  variable: "--font-playfair",
 });
 
 export const metadata: Metadata = {
@@ -22,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${roboto.variable} font-sans antialiased bg-white`}
+        className={`${roboto.variable} ${playfair.variable} font-sans antialiased bg-white`}
       >
         <Navbar />
         {children}

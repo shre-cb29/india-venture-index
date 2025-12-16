@@ -101,6 +101,57 @@ export function calculateSummaryStats(data: IndexData[]): SummaryStats {
   };
 }
 
+export function calculateReturns(data: IndexData[], timeRange: TimeRange): { indiaVentureReturn: number; nifty50Return: number } {
+  if (data.length === 0) {
+    return { indiaVentureReturn: 0, nifty50Return: 0 };
+  }
+
+  const latestData = data[data.length - 1];
+  const now = new Date();
+  const cutoffDate = new Date();
+
+  switch (timeRange) {
+    case '1Y':
+      cutoffDate.setFullYear(now.getFullYear() - 1);
+      break;
+    case '3Y':
+      cutoffDate.setFullYear(now.getFullYear() - 3);
+      break;
+    case '5Y':
+      cutoffDate.setFullYear(now.getFullYear() - 5);
+      break;
+    case 'ALL':
+      // Use the first data point
+      const firstData = data[0];
+      const indiaVentureReturn = ((latestData.indiaVentureIndex - firstData.indiaVentureIndex) / firstData.indiaVentureIndex) * 100;
+      const nifty50Return = ((latestData.nifty50Rebased - firstData.nifty50Rebased) / firstData.nifty50Rebased) * 100;
+      return { indiaVentureReturn, nifty50Return };
+  }
+
+  // Find the closest data point to the cutoff date
+  const startData = data.reduce((prev, curr) => {
+    return Math.abs(curr.date.getTime() - cutoffDate.getTime()) < Math.abs(prev.date.getTime() - cutoffDate.getTime())
+      ? curr
+      : prev;
+  });
+
+  const indiaVentureReturn = ((latestData.indiaVentureIndex - startData.indiaVentureIndex) / startData.indiaVentureIndex) * 100;
+  const nifty50Return = ((latestData.nifty50Rebased - startData.nifty50Rebased) / startData.nifty50Rebased) * 100;
+
+  return { indiaVentureReturn, nifty50Return };
+}
+
+export async function calculateTotalMarketCap(): Promise<number> {
+  try {
+    const companies = await parseCompanyData();
+    const totalMarketCap = companies.reduce((sum, company) => sum + company.currentValuation, 0);
+    return totalMarketCap;
+  } catch (error) {
+    console.error('Error calculating market cap:', error);
+    return 0;
+  }
+}
+
 export async function parseCompanyData(): Promise<CompanyData[]> {
   const response = await fetch('/India Venture Index - Lifetime returns.csv');
   const csvText = await response.text();

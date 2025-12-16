@@ -15,7 +15,7 @@ export default function Navbar() {
             <div className="relative">
               <TrendingUp className="h-8 w-8 text-emerald-600" strokeWidth={2.5} />
             </div>
-            <span className="text-xl font-bold text-gray-900">
+            <span className="text-xl font-serif font-bold text-gray-900">
               India Venture Index
             </span>
           </Link>
