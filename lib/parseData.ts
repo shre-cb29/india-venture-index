@@ -2,7 +2,7 @@ import Papa from 'papaparse';
 import { IndexData, SummaryStats, TimeRange, CompanyData } from './types';
 
 export async function parseIndexData(): Promise<IndexData[]> {
-  const response = await fetch('/India Venture Index - Index - v2.csv');
+  const response = await fetch('/India Venture Index - Index.csv');
   const csvText = await response.text();
 
   return new Promise((resolve, reject) => {
@@ -153,7 +153,7 @@ export async function calculateTotalMarketCap(): Promise<number> {
 }
 
 export async function parseCompanyData(): Promise<CompanyData[]> {
-  const response = await fetch('/India Venture Index - Lifetime returns.csv');
+  const response = await fetch('/India Venture Index - Lifetime Return.csv');
   const csvText = await response.text();
 
   return new Promise((resolve, reject) => {
