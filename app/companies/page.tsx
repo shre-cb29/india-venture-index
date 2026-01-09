@@ -148,7 +148,7 @@ export default function CompaniesPage() {
 
         <div className="mt-6 md:mt-8 text-xs md:text-sm text-gray-600">
           <p>* Valuations are in Indian Rupees (Crores)</p>
-          <p>* Current valuations as of November 30, 2025</p>
+          <p>* Current valuations as of December 31, 2025</p>
         </div>
       </div>
     </div>

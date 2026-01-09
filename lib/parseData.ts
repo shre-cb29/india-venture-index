@@ -180,7 +180,7 @@ export async function parseCompanyData(): Promise<CompanyData[]> {
 
             // Remove commas and parse numbers
             const ipoValuation = parseFloat(row['IPO valuation']?.replace(/,/g, '') || '0');
-            const currentValuation = parseFloat(row['30-Nov-25']?.replace(/,/g, '') || '0');
+            const currentValuation = parseFloat(row['31-Dec-25']?.replace(/,/g, '') || '0');
 
             return {
               listingDate,
