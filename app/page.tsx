@@ -109,6 +109,7 @@ export default function Home() {
               title="Total Market Cap"
               value={formatMarketCap(totalMarketCap)}
               icon={<Building2 className="h-5 w-5" />}
+              subtitle="as of 31 Jan 2026"
             />
             <SummaryCard
               title="YTD Return"

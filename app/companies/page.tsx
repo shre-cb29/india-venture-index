@@ -94,7 +94,8 @@ export default function CompaniesPage() {
                       IPO Valuation (₹ Cr)
                     </th>
                     <th className="text-right py-3 px-3 md:px-4 text-gray-700 font-semibold text-sm">
-                      Current Valuation (₹ Cr)
+                      Current Valuation (₹ Cr)<br />
+                      <span className="font-normal text-xs text-gray-500">as of 31 Jan 2026</span>
                     </th>
                     <th className="text-right py-3 px-3 md:px-4 text-gray-700 font-semibold text-sm">
                       All-Time Return
@@ -148,7 +149,7 @@ export default function CompaniesPage() {
 
         <div className="mt-6 md:mt-8 text-xs md:text-sm text-gray-600">
           <p>* Valuations are in Indian Rupees (Crores)</p>
-          <p>* Current valuations as of December 31, 2025</p>
+          <p>* Current valuations as of January 31, 2026</p>
         </div>
       </div>
     </div>

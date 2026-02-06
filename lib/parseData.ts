@@ -83,8 +83,9 @@ export function calculateSummaryStats(data: IndexData[]): SummaryStats {
   const latestData = data[data.length - 1];
   const currentYear = latestData.date.getFullYear();
 
-  // Find the first data point of the current year
-  const ytdStartData = data.find(item => item.date.getFullYear() === currentYear);
+  // Find the last data point of the previous year for YTD calculation
+  const previousYearData = data.filter(item => item.date.getFullYear() === currentYear - 1);
+  const ytdStartData = previousYearData.length > 0 ? previousYearData[previousYearData.length - 1] : null;
 
   const ytdReturn = ytdStartData
     ? ((latestData.indiaVentureIndex - ytdStartData.indiaVentureIndex) / ytdStartData.indiaVentureIndex) * 100
@@ -180,7 +181,7 @@ export async function parseCompanyData(): Promise<CompanyData[]> {
 
             // Remove commas and parse numbers
             const ipoValuation = parseFloat(row['IPO valuation']?.replace(/,/g, '') || '0');
-            const currentValuation = parseFloat(row['31-Dec-25']?.replace(/,/g, '') || '0');
+            const currentValuation = parseFloat(row['31-Jan-26']?.replace(/,/g, '') || '0');
 
             return {
               listingDate,
